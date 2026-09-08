@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algoritmos: Método de la Burbuja | 4to Año</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Fuente para código -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Método de la Burbuja (Bubble Sort)</h1>
+            <p class="subtitle">Material de Estudio - Programación 4to Año</p>
+            <p class="author">Profesor: Ing. Moisés Tinte</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="intro">
+            <h2>¿Qué es y cómo funciona?</h2>
+            <p>El <strong>método de la burbuja</strong> es un algoritmo de ordenamiento que funciona revisando cada elemento de una lista con el siguiente, intercambiándolos de posición si están en el orden equivocado.</p>
+            <p>Es necesario revisar varias veces toda la lista hasta que no se necesiten más intercambios, lo cual significa que la lista está ordenada. Es ideal para dar nuestros primeros pasos en la lógica algorítmica.</p>
+        </section>
+
+        <section class="simulator-section">
+            <h2>Simulador en Tiempo Real</h2>
+            <p>Presiona el botón para ver cómo los números más grandes "burbujean" hacia la derecha.</p>
+            
+            <div class="controls">
+                <button id="btn-generate">Generar Nuevo Vector</button>
+                <button id="btn-sort" class="primary">Ordenar Vector</button>
+            </div>
+            
+            <div id="array-container"></div>
+        </section>
+
+        <section class="code-section">
+            <h2>Implementación en Python</h2>
+            <p>Esta es la versión optimizada que utilizamos en clase. La variable <code>intercambio</code> permite detener el bucle si el vector ya quedó ordenado antes de tiempo.</p>
+            <pre><code>def ordenamiento_burbuja(vector):
+    n = len(vector)
+    
+    for i in range(n):
+        intercambio = False
+        
+        # Los últimos i elementos ya están ordenados
+        for j in range(0, n - i - 1):
+            if vector[j] > vector[j + 1]:
+                # Swap en Python
+                vector[j], vector[j + 1] = vector[j + 1], vector[j]
+                intercambio = True
+                
+        # Si no hubo intercambios, terminamos
+        if not intercambio:
+            break
+            
+    return vector
+
+# Prueba del algoritmo
+mi_vector = [64, 34, 25, 12, 22, 11, 90]
+print("Vector ordenado:", ordenamiento_burbuja(mi_vector))</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Desarrollo de Software y Lógica Matemática</p>
+            <div class="counter">
+                <span>Visitas a esta clase:</span>
+                <!-- Se utiliza un servicio gratuito de contador de visitas para sitios estáticos -->
+                <img src="https://hits.sh/github-pages-burbuja-4to.svg?style=for-the-badge&label=Vistas&color=007ec6" alt="Contador de visitas">
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
