@@ -1,93 +1,103 @@
-const arrayContainer = document.getElementById('array-container');
+const container = document.getElementById('array-container');
 const btnGenerate = document.getElementById('btn-generate');
 const btnSort = document.getElementById('btn-sort');
+const btnPause = document.getElementById('btn-pause');
+const speedSlider = document.getElementById('speed');
 
+let isPaused = false;
+let isSorting = false;
 let array = [];
-const ARRAY_SIZE = 15;
-const DELAY = 300;
 
-// Generar vector aleatorio
+// Generar un nuevo vector de números aleatorios
 function generateArray() {
+    container.innerHTML = '';
     array = [];
-    arrayContainer.innerHTML = '';
-    
-    for (let i = 0; i < ARRAY_SIZE; i++) {
-        // Valores entre 10 y 100 para que se vea bien en altura
-        const value = Math.floor(Math.random() * 90) + 10;
-        array.push(value);
-        
+    for (let i = 0; i < 15; i++) {
+        const val = Math.floor(Math.random() * 80) + 10; // Valores entre 10 y 90
+        array.push(val);
         const bar = document.createElement('div');
         bar.classList.add('bar');
-        bar.style.height = `${value}%`;
-        bar.innerText = value;
-        arrayContainer.appendChild(bar);
+        bar.style.height = `${val * 3}px`;
+        bar.innerText = val;
+        container.appendChild(bar);
     }
 }
 
-// Pausa para la animación
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+// Función que maneja el tiempo de espera y la pausa
+async function sleep() {
+    // Si está pausado, revisamos cada 100ms hasta que se reanude
+    while (isPaused) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    // Calculamos el delay basado en el slider (invertimos el valor para que a mayor slider, mayor velocidad)
+    const delay = 1010 - speedSlider.value; 
+    await new Promise(resolve => setTimeout(resolve, delay));
 }
 
-// Algoritmo Bubble Sort visual
+// Algoritmo de la Burbuja Visual
 async function bubbleSort() {
-    const bars = document.querySelectorAll('.bar');
-    btnGenerate.disabled = true;
-    btnSort.disabled = true;
-
-    let n = array.length;
-    let intercambio;
+    if (isSorting) return; // Evitar que se ejecute dos veces al mismo tiempo
+    isSorting = true;
     
+    let bars = document.querySelectorAll('.bar');
+    let n = array.length;
+
     for (let i = 0; i < n; i++) {
-        intercambio = false;
+        let intercambio = false;
         
         for (let j = 0; j < n - i - 1; j++) {
-            // Resaltar barras siendo comparadas
-            bars[j].style.backgroundColor = 'var(--bar-active)';
-            bars[j + 1].style.backgroundColor = 'var(--bar-active)';
+            // Cambiar color para mostrar comparación
+            bars[j].style.backgroundColor = 'var(--bar-compare)';
+            bars[j + 1].style.backgroundColor = 'var(--bar-compare)';
             
-            await sleep(DELAY);
-            
+            await sleep(); // Pausa interactiva
+
             if (array[j] > array[j + 1]) {
-                // Intercambiar valores en el array
+                // Intercambio en el arreglo lógico
                 let temp = array[j];
                 array[j] = array[j + 1];
                 array[j + 1] = temp;
-                
-                // Intercambiar visualmente (alturas y texto)
-                bars[j].style.height = `${array[j]}%`;
+
+                // Intercambio visual en el DOM
+                bars[j].style.height = `${array[j] * 3}px`;
                 bars[j].innerText = array[j];
-                
-                bars[j + 1].style.height = `${array[j + 1]}%`;
+                bars[j + 1].style.height = `${array[j + 1] * 3}px`;
                 bars[j + 1].innerText = array[j + 1];
-                
+
                 intercambio = true;
             }
-            
-            // Volver al color original
-            bars[j].style.backgroundColor = 'var(--bar-color)';
-            bars[j + 1].style.backgroundColor = 'var(--bar-color)';
+
+            // Restaurar color base
+            bars[j].style.backgroundColor = 'var(--bar-default)';
+            bars[j + 1].style.backgroundColor = 'var(--bar-default)';
         }
         
-        // Marcar la última barra como ordenada
+        // El último elemento comparado ya está en su lugar (verde)
         bars[n - i - 1].style.backgroundColor = 'var(--bar-sorted)';
         
+        // Optimización: si no hubo intercambios, marcar los restantes y salir
         if (!intercambio) {
-            // Si no hubo intercambios, marcar el resto como ordenado
-            for (let k = 0; k < n - i - 1; k++) {
+            for(let k = 0; k < n - i - 1; k++){
                 bars[k].style.backgroundColor = 'var(--bar-sorted)';
             }
             break;
         }
     }
-    
-    btnGenerate.disabled = false;
-    btnSort.disabled = false;
+    isSorting = false;
 }
 
-// Event Listeners
-btnGenerate.addEventListener('click', generateArray);
+// Eventos de los botones
+btnGenerate.addEventListener('click', () => {
+    if(!isSorting) generateArray();
+});
+
 btnSort.addEventListener('click', bubbleSort);
 
-// Inicializar al cargar la página
-window.onload = generateArray;
+btnPause.addEventListener('click', () => {
+    isPaused = !isPaused;
+    btnPause.innerText = isPaused ? 'Reanudar' : 'Pausar';
+    btnPause.classList.toggle('paused'); // Cambia la clase para modificar el color del botón
+});
+
+// Inicializar el primer vector al cargar la página
+generateArray();
