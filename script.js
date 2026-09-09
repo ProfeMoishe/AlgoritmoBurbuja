@@ -8,35 +8,40 @@ let isPaused = false;
 let isSorting = false;
 let array = [];
 
-// Generar un nuevo vector de números aleatorios
+// Adaptar la cantidad de barras según el tamaño del dispositivo
+function getElementCount() {
+    return window.innerWidth < 480 ? 10 : 15;
+}
+
+// Generar nuevo vector aleatorio
 function generateArray() {
     container.innerHTML = '';
     array = [];
-    for (let i = 0; i < 15; i++) {
-        const val = Math.floor(Math.random() * 80) + 10; // Valores entre 10 y 90
+    const count = getElementCount();
+    
+    for (let i = 0; i < count; i++) {
+        const val = Math.floor(Math.random() * 80) + 10;
         array.push(val);
         const bar = document.createElement('div');
         bar.classList.add('bar');
-        bar.style.height = `${val * 3}px`;
+        bar.style.height = `${val * 2.2}px`; // Escala optimizada para pantallas pequeñas
         bar.innerText = val;
         container.appendChild(bar);
     }
 }
 
-// Función que maneja el tiempo de espera y la pausa
+// Control del flujo de ejecución (Velocidad y Pausa)
 async function sleep() {
-    // Si está pausado, revisamos cada 100ms hasta que se reanude
     while (isPaused) {
         await new Promise(resolve => setTimeout(resolve, 100));
     }
-    // Calculamos el delay basado en el slider (invertimos el valor para que a mayor slider, mayor velocidad)
-    const delay = 1010 - speedSlider.value; 
+    const delay = 1010 - parseInt(speedSlider.value); 
     await new Promise(resolve => setTimeout(resolve, delay));
 }
 
-// Algoritmo de la Burbuja Visual
+// Algoritmo de Ordenamiento
 async function bubbleSort() {
-    if (isSorting) return; // Evitar que se ejecute dos veces al mismo tiempo
+    if (isSorting) return;
     isSorting = true;
     
     let bars = document.querySelectorAll('.bar');
@@ -46,38 +51,34 @@ async function bubbleSort() {
         let intercambio = false;
         
         for (let j = 0; j < n - i - 1; j++) {
-            // Cambiar color para mostrar comparación
             bars[j].style.backgroundColor = 'var(--bar-compare)';
             bars[j + 1].style.backgroundColor = 'var(--bar-compare)';
             
-            await sleep(); // Pausa interactiva
+            await sleep();
 
             if (array[j] > array[j + 1]) {
-                // Intercambio en el arreglo lógico
+                // Swap lógico
                 let temp = array[j];
                 array[j] = array[j + 1];
                 array[j + 1] = temp;
 
-                // Intercambio visual en el DOM
-                bars[j].style.height = `${array[j] * 3}px`;
+                // Actualización visual
+                bars[j].style.height = `${array[j] * 2.2}px`;
                 bars[j].innerText = array[j];
-                bars[j + 1].style.height = `${array[j + 1] * 3}px`;
+                bars[j + 1].style.height = `${array[j + 1] * 2.2}px`;
                 bars[j + 1].innerText = array[j + 1];
 
                 intercambio = true;
             }
 
-            // Restaurar color base
             bars[j].style.backgroundColor = 'var(--bar-default)';
             bars[j + 1].style.backgroundColor = 'var(--bar-default)';
         }
         
-        // El último elemento comparado ya está en su lugar (verde)
         bars[n - i - 1].style.backgroundColor = 'var(--bar-sorted)';
         
-        // Optimización: si no hubo intercambios, marcar los restantes y salir
         if (!intercambio) {
-            for(let k = 0; k < n - i - 1; k++){
+            for (let k = 0; k < n - i - 1; k++) {
                 bars[k].style.backgroundColor = 'var(--bar-sorted)';
             }
             break;
@@ -86,9 +87,9 @@ async function bubbleSort() {
     isSorting = false;
 }
 
-// Eventos de los botones
+// Listeners de Eventos
 btnGenerate.addEventListener('click', () => {
-    if(!isSorting) generateArray();
+    if (!isSorting) generateArray();
 });
 
 btnSort.addEventListener('click', bubbleSort);
@@ -96,8 +97,13 @@ btnSort.addEventListener('click', bubbleSort);
 btnPause.addEventListener('click', () => {
     isPaused = !isPaused;
     btnPause.innerText = isPaused ? 'Reanudar' : 'Pausar';
-    btnPause.classList.toggle('paused'); // Cambia la clase para modificar el color del botón
+    btnPause.classList.toggle('paused');
 });
 
-// Inicializar el primer vector al cargar la página
+// Regenerar arreglo si cambian la orientación del celular
+window.addEventListener('resize', () => {
+    if (!isSorting) generateArray();
+});
+
+// Cargar vector al iniciar
 generateArray();
